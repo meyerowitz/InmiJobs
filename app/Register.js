@@ -1,106 +1,78 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import React from 'react';
+import { Text, View, TextInput, TouchableOpacity, ScrollView,  Dimensions , StatusBar} from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from 'expo-linear-gradient';
+import { Search, TrendingUp, Star, Award, Home, BarChart2, Wallet, FileText, User, EyeOff } from 'lucide-react-native';
+import { useTheme } from './Components/Temas_y_colores/ThemeContext';
+import {useRouter} from 'expo-router';
+const { width } = Dimensions.get('window');
 
-const RegisterScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleRegister = () => {
-    if (name && email && password) {
-      Alert.alert('¡Éxito!', 'Cuenta creada correctamente', [
-        { text: 'OK', onPress: () => navigation.replace('MainTabs') }
-      ]);
-    } else {
-      Alert.alert('Error', 'Por favor, completa todos los campos');
-    }
-  };
-
+export default function Register() {
+  const { theme, toggleTheme, isDark } = useTheme();
+      const router = useRouter();
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Crea tu cuenta</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre completo"
-        value={name}
-        onChangeText={setName}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <StatusBar barStyle={'light-content'} backgroundColor={theme.gradient[0]}/>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        
+        {/* --- SECCIÓN LOGIN --- */}
+        <LinearGradient 
+          colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]} 
+          style={{ paddingTop: 40, flex:1 }}
+        >
+          {/* Contenedor Mascota */}
+          <View style={{ height: 150, alignItems: 'center', justifyContent: 'center' }}>
+             <View style={{ width: 80, height: 80, backgroundColor: '#ffffff', borderRadius: 20 }} />
+          </View>
+          
+          {/* Formulario Blanco */}
+          <View style={{ backgroundColor: 'white', padding: 30, borderTopLeftRadius: 40, borderTopRightRadius: 40 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 25 }}>Register</Text>
+            
+            <TextInput 
+              style={{ borderBottomWidth: 1, borderBottomColor: '#EEE', paddingVertical: 10, marginBottom: 20, fontSize: 14 }} 
+              placeholder="email" 
+            />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Correo electrónico"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+            <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#EEE', marginBottom: 15 }}>
+              <TextInput 
+                style={{ flex: 1, paddingVertical: 10, fontSize: 14 }} 
+                placeholder="••••••••••••" 
+                secureTextEntry 
+              />
+              <EyeOff size={18} color="#A0A0A0" />
+            </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+            <TouchableOpacity>
+              <Text style={{ color: '#A0A0A0', fontSize: 12, marginBottom: 20 }}>Forget Password?</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Registrarse</Text>
-      </TouchableOpacity>
+            <TouchableOpacity style={{ backgroundColor: '#1A1A2E', padding: 15, borderRadius: 15, alignItems: 'center' }}>
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Login</Text>
+            </TouchableOpacity>
+            
+            <View style={{width: 320,marginTop: 20,display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",}}>
+                <Text style={{color: "#544F4F",fontFamily: "roboto",fontWeight: "bold",fontSize: 16,}}>¿Ya tienes cuenta? </Text>
+                <TouchableOpacity onPress={() => router.replace("/Login")}>
+                    <Text style={{color: "#0661BC",fontFamily: "roboto",fontWeight: "bold",fontSize: 16, textDecorationLine: "underline",}}>Inicia Sesion aquí</Text>
+                </TouchableOpacity>
+                </View>
 
-      <TouchableOpacity 
-        style={styles.linkButton} 
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
-      </TouchableOpacity>
-    </ScrollView>
+            {/* Iconos Sociales */}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 25 }}>
+               {[1, 2, 3].map((_, i) => (
+                 <View key={i} style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#EEE', justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 }}>
+                   <View style={{ width: 15, height: 15, backgroundColor: '#DDD', borderRadius: 5 }} />
+                 </View>
+               ))}
+            </View>
+          </View>
+        </LinearGradient>
+
+       
+
+      </ScrollView>
+
+    </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-    color: '#333',
-  },
-  input: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  button: {
-    backgroundColor: '#34C759', // Un verde para diferenciarlo del azul del login
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  linkButton: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
-});
-
-export default RegisterScreen;
+}

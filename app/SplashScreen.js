@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, Image } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from 'expo-router';
 
 const SplashScreen = () => {
@@ -9,7 +10,7 @@ const SplashScreen = () => {
     
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 1500,
+      duration: 1000,
       useNativeDriver: true,
     }).start(() => {
       
@@ -27,12 +28,12 @@ const SplashScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Animated.Image
         source={require('../assets/img/imagotipo.png')} // Tu imagen aquí
-        style={[styles.image, { opacity: fadeAnim }]}
+        style={[{ width: 200,height: 300,}, { opacity: fadeAnim }]}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

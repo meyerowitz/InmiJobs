@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient'; // npx expo install expo-linear-gradient
 import {useRouter} from 'expo-router';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
+import { SafeAreaView } from "react-native-safe-area-context";
 const { width } = Dimensions.get('window');
 
 export default function Feed() {
@@ -13,7 +14,7 @@ export default function Feed() {
     const router = useRouter();
   return (
     <ScrollView style={styles.container} bounces={false}>
-       <StatusBar barStyle={'light-content'} backgroundColor={theme.gradient[0]}/>
+       
       {/* Header con Imagen de Fondo */}
       <ImageBackground 
         source={{ uri: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80' }} 

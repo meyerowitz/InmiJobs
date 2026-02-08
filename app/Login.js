@@ -13,8 +13,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar barStyle={'light-content'} backgroundColor={theme.gradient[0]}/>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
+      <StatusBar  barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
          <LinearGradient 
           colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]} 
           style={{ flex:1 }}

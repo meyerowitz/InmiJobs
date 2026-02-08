@@ -18,7 +18,7 @@ function MyTabs() {
     <Tab.Navigator 
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { height: 60 , borderTopLeftRadius: 20, borderTopRightRadius: 20 , paddingBottom:insets}
+        tabBarStyle: { height: 60 +insets.bottom, borderTopLeftRadius: 20, borderTopRightRadius: 20 , paddingBottom:insets.bottom}
       }}
     >
       <Tab.Screen 
@@ -38,7 +38,7 @@ function MyTabs() {
 export default function MainLayout() {
     const { theme, isDark } = useTheme();
   return (
-    <><StatusBar barStyle={'light-content'} backgroundColor={theme.gradient[0]}/>
+   <><StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
     <Drawer.Navigator
      screenOptions={({ navigation }) => ({
     headerTransparent: true, 

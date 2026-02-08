@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; // Para el router.replace que mencionaste
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ export default function Profile() {
   ];
 
   return (
+    <SafeArea style={styles.container}>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       
       {/* SECCIÓN 1: PORTADA Y AVATAR */}
@@ -124,6 +126,7 @@ export default function Profile() {
       </View>
 
     </ScrollView>
+    </SafeArea>
   );
 }
 

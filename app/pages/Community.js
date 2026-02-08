@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity } 
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
+import { SafeAreaView } from "react-native-safe-area-context";
 // Datos de ejemplo para los posts
 const POSTS = [
   {
@@ -71,7 +72,7 @@ export default function Community() {
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: '#ffffff'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
        {/* Header Superior */}
          <View style={{flexDirection: 'row',paddingHorizontal: 15,paddingTop: 18.5,paddingBottom: 10,elevation:20}}>
            <Text style={{fontSize: 28, fontWeight: 'bold', color: '#1877f2', letterSpacing: -1 , marginLeft:50, marginRight:10}}>InmiJobs</Text>
@@ -97,7 +98,7 @@ export default function Community() {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

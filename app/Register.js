@@ -1,31 +1,111 @@
-import React, { useState } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView,  Dimensions , StatusBar, Image} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, StatusBar, Image, Animated } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Lock, EyeOff, Eye } from 'lucide-react-native';
 import { useTheme } from './Components/Temas_y_colores/ThemeContext';
-import {useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
+import {Users} from './Components/Data/Users.json'
 import { Ionicons } from '@expo/vector-icons';
-const { width } = Dimensions.get('window');
+
+const { width, height } = Dimensions.get('window');
+
+// --- COMPONENTE DE BURBUJAS ANIMADAS ---
+const FloatingOrb = ({ size, duration, delay, startPos }) => {
+  const anim = new Animated.Value(0);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: duration,
+          delay: delay,
+          useNativeDriver: true,
+        }),
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: duration,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -40] // Movimiento sutil hacia arriba
+  });
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: 'rgba(255, 255, 255, 0.12)', // Color suave
+          transform: [{ translateY }],
+        },
+        startPos
+      ]}
+    />
+  );
+};
 
 export default function Register() {
   const { theme, isDark } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
-      const router = useRouter();
+  const router = useRouter();
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
-         <LinearGradient 
-          colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]} 
-          style={{ flex:1 }}
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
+      <StatusBar 
+  barStyle={'light-content'} 
+  backgroundColor={'transparent'} 
+  translucent={true} 
+/>
+      
+      <LinearGradient
+        colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]}
+        style={{ flex: 1 }}
+      >
+        {/* --- CAPA DE BURBUJAS (Detrás de todo) --- */}
+        <View style={{ ...styles.absoluteFill, zIndex: 0 }}>
+          <FloatingOrb size={150} duration={5000} delay={0} startPos={{ top: '5%', left: '10%' }} />
+          <FloatingOrb size={100} duration={4000} delay={500} startPos={{ top: '15%', right: '5%' }} />
+          <FloatingOrb size={200} duration={6000} delay={200} startPos={{ top: '25%', left: '-10%' }} />
+          <FloatingOrb size={80} duration={4500} delay={1000} startPos={{ top: '35%', right: '20%' }} />
+        </View>
+
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, paddingTop: '65%' }}
+          showsVerticalScrollIndicator={false}
         >
-      <ScrollView contentContainerStyle={{ height:'110%',paddingTop:'65%'}}>   
-        <Image source={require('../assets/img/inmifriend.png')} style={{position:'absolute', zIndex:1, width:150, height:150, left:'29%', top:'20%'}}></Image>
-         <Image source={require('../assets/img/brujula.png')} style={{position:'absolute', zIndex:1, width:100, height:100, left:'70%', top:'5%'}}></Image>
-          <Image source={require('../assets/img/triangulo.png')} style={{position:'absolute', zIndex:1, width:90, height:90, left:'5%', top:'30%'}}></Image>
-          {/* Formulario Blanco */}
-          <View style={{ backgroundColor: 'white', padding: 30, borderTopLeftRadius: 40, borderTopRightRadius: 40 , height:'125%'}}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 25, color: theme.text}}>Create Account</Text>
+          {/* --- IMÁGENES (zIndex superior a las burbujas) --- */}
+          <Image 
+            source={require('../assets/img/inmifriend.png')} 
+            style={{ position: 'absolute', zIndex: 1, width: 160, height: 160, left: '26%', top: '18%' }} 
+          />
+          <Image 
+            source={require('../assets/img/brujula.png')} 
+            style={{ position: 'absolute', zIndex: 1, width: 130, height: 130, left: '74%', top: '2%' }} 
+          />
+          <Image 
+            source={require('../assets/img/triangulo.png')} 
+            style={{ position: 'absolute', zIndex: 1, width: 140, height: 140, left: '-10%', top: '26%' }} 
+          />
+
+          {/* --- FORMULARIO BLANCO --- */}
+          <View style={{ 
+            backgroundColor: 'white', 
+            padding: 30, 
+            borderTopLeftRadius: 40, 
+            borderTopRightRadius: 40, 
+            minHeight: height * 0.80 // Ajustado para que cubra el fondo
+          }}>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 25, color: theme.text}}>Create Account</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 , width:'100%',borderBottomColor: '#EEE',borderBottomWidth: 1, paddingVertical:10}}>
               {/* Círculo con Persona */}
               <View style={{width: 36,height: 36,borderRadius: 18,backgroundColor: theme.primary + '20',justifyContent: 'center',alignItems: 'center',marginRight: 12 }}>
@@ -81,11 +161,52 @@ export default function Register() {
                 </View>
           </View>
           </View>
-
-       
-
-      </ScrollView>
-                </LinearGradient>
+        </ScrollView>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
+
+const styles = {
+  absoluteFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    width: '100%',
+    borderBottomColor: '#EEE',
+    borderBottomWidth: 1,
+    paddingVertical: 10
+  },
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333'
+  },
+  footerContainer: {
+    marginTop: 25,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  footerText: {
+    fontFamily: "roboto",
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#544F4F"
+  }
+};

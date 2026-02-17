@@ -12,9 +12,11 @@ const { width } = Dimensions.get('window');
 export default function Feed() {
     const { theme, isDark } = useTheme();
     const router = useRouter();
+    
   return (
+    <SafeAreaView style={{flex:1}}>
     <ScrollView style={styles.container} bounces={false}>
-       
+      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
       {/* Header con Imagen de Fondo */}
       <ImageBackground 
         source={{ uri: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80' }} 
@@ -92,6 +94,7 @@ export default function Feed() {
         </View>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "_id": "001",
+      "NickName": "Rober_Prop",
+      "Name": "Roberto Gómez",
+      "image": "https://randomuser.me/api/portraits/men/5.jpg",
+      "email": "hamburguesasrober@gmail.com",
+      "password": "hamburguesa123",
+      "role": "propietario",
+      "empresa": "1"
+    },
+    {
+      "_id": "002",
+      "NickName": "Ana_Recruit",
+      "Name": "Ana Martínez",
+      "image": "https://randomuser.me/api/portraits/women/49.jpg",
+      "email": "ana.rh@empresa.com",
+      "password": "reclutador2024",
+      "role": "reclutador",
+      "empresa": "1"
+    },
+    {
+      "_id": "003",
+      "NickName": "Juan_Civil",
+      "Name": "Juan Pérez",
+      "image": "https://randomuser.me/api/portraits/men/39.jpg",
+      "email": "juan.perez@mail.com",
+      "password": "civilpassword",
+      "role": "civil",
+      "empresa": "0"
+    },
+    {
+      "_id": "004",
+      "NickName": ".",
+      "Name": "Juan Pérez",
+      "image": "https://randomuser.me/api/portraits/men/78.jpg",
+      "email": "juan.perez@mail.com",
+      "password": ".",
+      "role": "civil",
+      "empresa": "0"
+    }
+  ]
+}

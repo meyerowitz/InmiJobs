@@ -16,7 +16,7 @@ export default function ForgotPassword() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={theme.gradient[0]}/>
+      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
       <View style={styles.content}>
         <Text style={styles.title}>Reset your password</Text>
         <Text style={styles.subtitle}>Please enter your new password</Text>

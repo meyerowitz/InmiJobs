@@ -1,17 +1,20 @@
 import { Stack } from "expo-router";
 import { ThemeProvider } from './Components/Temas_y_colores/ThemeContext';
+import { UserProvider } from './Components/Data/DataProvider';
 
 export default function RootLayout() {
   return (
+  
     <ThemeProvider>
-      <Stack screenOptions={{headerShown:false}} >
+      <UserProvider>
+        <Stack screenOptions={{headerShown:false}} >
         <Stack.Screen
         name="index"
         options={{
           animation: "none", // Animación suave para la entrada
         }}
       />
-      <Stack.Screen
+        <Stack.Screen
         name="Login"
         options={{
           animation: "slide_from_right", // Esta subirá como un panel
@@ -19,6 +22,12 @@ export default function RootLayout() {
       />
        <Stack.Screen
         name="Register"
+        options={{
+          animation: "slide_from_right", // Esta subirá como un panel
+        }}
+      />
+       <Stack.Screen
+        name="ChooseaRol"
         options={{
           animation: "slide_from_right", // Esta subirá como un panel
         }}
@@ -71,7 +80,8 @@ export default function RootLayout() {
           animation: "slide_from_right", // Esta subirá como un panel
         }}
       />
-      </Stack>
+        </Stack>
+      </UserProvider>
     </ThemeProvider>
   );
 }

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity , StatusBar} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { userData, useUser } from '../Components/Data/DataProvider';
 // Datos de ejemplo para los posts
 const POSTS = [
   {
@@ -30,6 +31,9 @@ const POSTS = [
 
 export default function Community() {
    const router = useRouter();
+   const { userData, logout } = useUser();
+
+  if (!userData) return <Text>No hay sesión activa</Text>;
   const renderPost = ({ item }) => (
     <View style={styles.postContainer}>
       {/* Cabecera del Post */}
@@ -73,13 +77,14 @@ export default function Community() {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
+      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
        {/* Header Superior */}
          <View style={{flexDirection: 'row',paddingHorizontal: 15,paddingTop: 18.5,paddingBottom: 10,elevation:20}}>
            <Text style={{fontSize: 28, fontWeight: 'bold', color: '#1877f2', letterSpacing: -1 , marginLeft:50, marginRight:10}}>InmiJobs</Text>
            <View style={{ flexDirection: 'row' }}>
              <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 90, marginLeft: 10}}><Ionicons name="search" size={19} /></TouchableOpacity>
              <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 20, marginLeft: 10}}><Ionicons name="chatbubble-ellipses" size={19} /></TouchableOpacity>
-             <TouchableOpacity onPress={()=>{router.replace('/pages/profile')}} style={{padding:3, backgroundColor:'white', borderRadius:90, elevation:10, marginLeft:10}}><Image source={{ uri: 'https://randomuser.me/api/portraits/women/2.jpg' }} style={styles.avatar} /></TouchableOpacity>
+             <TouchableOpacity onPress={()=>{router.replace('/pages/profile')}} style={{padding:3, backgroundColor:'white', borderRadius:90, elevation:10, marginLeft:10}}><Image source={{ uri: userData.image}} style={styles.avatar} /></TouchableOpacity>
            </View>
          </View>
 
@@ -90,10 +95,10 @@ export default function Community() {
         ListHeaderComponent={() => (
           /* Sección "¿Qué estás pensando?" */
           <View style={styles.inputSection}>
-             <View style={{padding:4, backgroundColor:'white', borderRadius:90, elevation:5}}><Image source={{ uri: 'https://randomuser.me/api/portraits/women/2.jpg' }} style={styles.avatar} /></View>
+             <View style={{padding:4, backgroundColor:'white', borderRadius:90, elevation:5}}><Image source={{ uri: userData.image }} style={styles.avatar} /></View>
           
             <View style={styles.inputFake}>
-              <Text style={{ color: '#65676b' }}>¿En Qué estás pensando Monica?</Text>
+              <Text style={{ color: '#65676b' }}>¿En Qué estás pensando?</Text>
             </View>
           </View>
         )}

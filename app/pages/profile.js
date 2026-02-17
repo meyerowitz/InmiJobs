@@ -8,17 +8,20 @@ import {
   TouchableOpacity, 
   ImageBackground,
   Dimensions,
-  FlatList
+  FlatList, StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; // Para el router.replace que mencionaste
 import { SafeAreaView } from "react-native-safe-area-context";
+import { userData, useUser } from '../Components/Data/DataProvider';
 
 const { width } = Dimensions.get('window');
 
 export default function Profile() {
   const router = useRouter();
-
+   const { userData, logout } = useUser();
+  
+    if (!userData) return <Text>No hay sesión activa</Text>;
   // Datos de ejemplo basados en tus imágenes
   const friends = [
     { id: '1', name: 'Eduardo Crespo', img: 'https://randomuser.me/api/portraits/men/1.jpg' },
@@ -28,7 +31,9 @@ export default function Profile() {
   ];
 
   return (
-    <SafeArea style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+            
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       
       {/* SECCIÓN 1: PORTADA Y AVATAR */}
@@ -46,7 +51,7 @@ export default function Profile() {
 
         <View style={styles.avatarWrapper}>
           <Image 
-            source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} 
+            source={{ uri: userData.image}} 
             style={styles.profileAvatar}
           />
           <TouchableOpacity style={styles.cameraIcon}>
@@ -57,7 +62,7 @@ export default function Profile() {
 
       {/* SECCIÓN 2: INFO PERSONAL (Basado en Meyerowitz Rebeca) */}
       <View style={styles.mainInfo}>
-        <Text style={styles.userName}>Monica Velasquez <Ionicons name="chevron-down" size={18} /></Text>
+        <Text style={styles.userName}>{userData.name}<Ionicons name="chevron-down" size={18} /></Text>
         <Text style={styles.statsSummary}>7 amigos · 16 publicaciones</Text>
         
         <Text style={styles.bioText}>
@@ -109,9 +114,9 @@ export default function Profile() {
       {/* SECCIÓN 4: PUBLICACIONES (Post estilo Inmifriend) */}
       <View style={styles.sectionPadding}>
         <View style={styles.postHeader}>
-          <Image source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} style={styles.postAvatar} />
+          <Image source={{ uri: userData.image }} style={styles.postAvatar} />
           <View>
-            <Text style={styles.postAuthor}>Meyerowitz Rebeca</Text>
+            <Text style={styles.postAuthor}>{userData.name}</Text>
             <Text style={styles.postDate}>29 ene. · 🌎</Text>
           </View>
         </View>
@@ -126,7 +131,7 @@ export default function Profile() {
       </View>
 
     </ScrollView>
-    </SafeArea>
+    </SafeAreaView>
   );
 }
 

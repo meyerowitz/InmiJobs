@@ -32,13 +32,34 @@
     },
     {
       "_id": "004",
-      "NickName": ".",
+      "NickName": "3",
       "Name": "Juan Pérez",
       "image": "https://randomuser.me/api/portraits/men/78.jpg",
       "email": "juan.perez@mail.com",
-      "password": ".",
+      "password": "3",
       "role": "civil",
       "empresa": "0"
+    },
+    {
+      "_id": "004",
+      "NickName": "1",
+      "Name": "Ana Martínez",
+      "image": "https://randomuser.me/api/portraits/women/49.jpg",
+      "email": "ana.rh@empresa.com",
+      "password": "1",
+      "role": "reclutador",
+      "empresa": "1"
+    },
+    {
+      "_id": "001",
+      "NickName": "2",
+      "Name": "Roberto Gómez",
+      "image": "https://randomuser.me/api/portraits/men/5.jpg",
+      "email": "hamburguesasrober@gmail.com",
+      "password": "2",
+      "role": "propietario",
+      "empresa": "1"
     }
+    
   ]
 }

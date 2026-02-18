@@ -71,6 +71,9 @@ export default function Jobs(){
           <Ionicons name="share-social-outline" size={20} color="#65676b" />
           <Text style={styles.actionText}>Compartir</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="share-social-outline" size={20} color="#65676b" />
+        </TouchableOpacity>
       </View>
     </View>
   );

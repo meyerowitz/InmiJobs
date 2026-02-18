@@ -12,7 +12,11 @@ export default function PasswordRecoveryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+    <StatusBar 
+  barStyle="light-content" 
+  backgroundColor="#B85CFB" 
+  translucent={true} // Esto ayuda a Android a gestionar el dibujado
+/>
       {/* Botón Go Back */}
       <TouchableOpacity onPress={()=>{router.replace('Login')}} style={styles.backButton}>
         <Ionicons name="chevron-back" size={20} color="#9E9E9E" />

@@ -45,7 +45,11 @@ export default function VerificationScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+      <StatusBar 
+  barStyle="light-content" 
+  backgroundColor="#B85CFB" 
+  translucent={true} // Esto ayuda a Android a gestionar el dibujado
+/>
       {/* Botón Volver */}
       <TouchableOpacity onPress={()=>{router.replace('/pages/olvide/forgot_password')}} style={styles.backButton}>
         <Ionicons name="chevron-back" size={24} color="#9E9E9E" />

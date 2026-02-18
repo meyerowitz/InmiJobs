@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, StatusBar, Image, Animated, Alert } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, Image, Animated, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Lock, EyeOff, Eye } from 'lucide-react-native';
@@ -8,6 +8,9 @@ import { useRouter } from 'expo-router';
 import Users from './Components/Data/Users.json'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setUserData, useUser } from './Components/Data/DataProvider';
+import { db } from '../firebaseConfig'; 
+import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { StatusBar } from 'expo-status-bar';
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,7 +66,7 @@ export default function Login() {
   const [userInput, setUserInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const { setUserData } = useUser();
-
+  const [loading, setLoading] = useState(false);
   const handleLogin = async () => {
     try {
     // Validamos que no estén vacíos
@@ -158,14 +161,71 @@ export default function Login() {
     Alert.alert("Error de Sistema", "No se pudo procesar el inicio de sesión.");
   }
 };
+const handleLoginCloud = async () => {
+  try {
+    if (!userInput.trim() || !passwordInput.trim()) {
+      Alert.alert("Atención", "Por favor, completa los campos para buscar en la nube.");
+      return;
+    }
+    setLoading(true);
+    console.log("Iniciando búsqueda en Firebase...");
+
+    // 1. Creamos dos consultas: una por email y otra por NickName
+    const usuariosRef = collection(db, "Usuarios");
+    
+    // Consulta A: Por Email
+    const qEmail = query(usuariosRef, where("email", "==", userInput.toLowerCase().trim()));
+    // Consulta B: Por NickName
+    const qNick = query(usuariosRef, where("NickName", "==", userInput));
+
+    const [snapEmail, snapNick] = await Promise.all([getDocs(qEmail), getDocs(qNick)]);
+    
+    // Unificamos resultados
+    const docs = [...snapEmail.docs, ...snapNick.docs];
+
+    if (docs.length > 0) {
+      // Tomamos el primer usuario encontrado
+      const userCloud = docs[0].data();
+      const userId = docs[0].id;
+
+      // 2. Validar contraseña
+      if (userCloud.password === passwordInput) {
+        
+        // 3. Gestión de sesión (Tu lógica original)
+        const sessionData = {
+          id: userId,
+          name: userCloud.Name,
+          role: userCloud.role,
+          image: userCloud.image || null,
+          empresa: userCloud.empresa,
+          loginAt: new Date().toISOString()
+        };
+
+        await AsyncStorage.setItem('@session', JSON.stringify(sessionData));
+        setUserData(sessionData);
+        setLoading(false)
+        Alert.alert("Éxito (Cloud)", `Bienvenido de nuevo, ${userCloud.Name}`);
+        router.replace('/pages/Navigation');
+      } else {
+        Alert.alert("Error", "La contraseña de la nube no coincide.");
+      }
+    } else {
+      Alert.alert("No encontrado", "No existe ningún usuario en Firebase con ese Email/NickName.");
+    }
+  } catch (error) {
+    console.error("Error en Login Cloud:", error);
+    Alert.alert("Error de Conexión", "No se pudo acceder a la base de datos remota.");
+  }
+};
 
   return (
+    <>
+
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
-      <StatusBar 
-  barStyle={'light-content'} 
-  backgroundColor={'transparent'} 
-  translucent={true} 
-/>
+          <StatusBar 
+        barStyle="light-content" 
+        backgroundColor="#f90000" 
+      />
       
       <LinearGradient
         colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]}
@@ -251,10 +311,14 @@ export default function Login() {
 
             <View style={{ marginTop: 20 }}>
               <TouchableOpacity 
-                onPress={handleLogin2}
+                onPress={handleLoginCloud} onLongPress={handleLogin2}
                 style={{ backgroundColor: theme.button, padding: 15, borderRadius: 15, alignItems: 'center', elevation: 2 }}
               >
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Login</Text>
+               {loading ? (
+                               <ActivityIndicator color="white" />
+                             ) : (
+                               <Text style={{ color: 'white', fontWeight: 'bold' }}>Login</Text>
+                             )}
               </TouchableOpacity>
 
               <View style={styles.footerContainer}>
@@ -268,6 +332,7 @@ export default function Login() {
         </ScrollView>
       </LinearGradient>
     </SafeAreaView>
+    </>
   );
 }
 

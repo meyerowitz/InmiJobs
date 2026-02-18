@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, StatusBar, Image, Animated } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, Image, Animated, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Lock, EyeOff, Eye } from 'lucide-react-native';
@@ -7,6 +7,10 @@ import { useTheme } from './Components/Temas_y_colores/ThemeContext';
 import { useRouter } from 'expo-router';
 import {Users} from './Components/Data/Users.json'
 import { Ionicons } from '@expo/vector-icons';
+import { db } from '../firebaseConfig'; 
+import { collection, addDoc, serverTimestamp, query ,where,getDocs} from "firebase/firestore";
+import Volver from './Components/Botones/Volver'
+import { StatusBar } from 'expo-status-bar';
 
 const { width, height } = Dimensions.get('window');
 
@@ -53,19 +57,137 @@ const FloatingOrb = ({ size, duration, delay, startPos }) => {
     />
   );
 };
+const portraits = [
+  "https://i.pinimg.com/1200x/be/00/cc/be00cc9524a7e4edddfee2edc50f2ec7.jpg",
+  "https://i.pinimg.com/1200x/e4/0d/62/e40d629aa07c9215905fb8ae969223b9.jpg",
+  "https://i.pinimg.com/736x/37/0f/15/370f151c228d7f0c9b1cc7cfde3fb5fb.jpg",
+  "https://i.pinimg.com/1200x/55/02/9b/55029b4937e25f252431b1a259c77920.jpg",
+  "https://i.pinimg.com/736x/ce/6a/d5/ce6ad517c04e5895bfd8626326bd1281.jpg",
+  "https://i.pinimg.com/1200x/d5/b9/e0/d5b9e0ab94c15aeec8471d302bcab02e.jpg",
+  "https://i.pinimg.com/736x/21/51/fb/2151fb446e2858c477d260b7929c97b7.jpg"
+];
 
 export default function Register() {
   const { theme, isDark } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  // --- ESTADOS PARA LOS CAMPOS DE FIREBASE ---
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickName, setNickName] = useState('');
+  const [empresa, setEmpresa] = useState('Independiente');
+  const [role, setRole] = useState('User');
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
+  const handleRegister2 = async () => {
+    // 1. Validación básica
+    if (!name || !email || !password) {
+      Alert.alert("Error", "Por favor completa los campos principales.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 2. Guardar en la colección "Usuarios" (Como tu captura)
+      await addDoc(collection(db, "Usuarios"), {
+        Name: name,
+        NickName: nickName || name.split(' ')[0], // Si no hay nick, usa el primer nombre
+        email: email.toLowerCase().trim(),
+        image:Image,
+        password: password, // NOTA: En producción lo ideal es usar Firebase Auth
+        empresa: empresa,
+        role: role,
+        createdAt: serverTimestamp()
+      });
+
+      Alert.alert("¡Éxito!", "Cuenta creada correctamente.");
+      router.replace('/Login');
+
+    } catch (error) {
+      console.error("Error al registrar:", error);
+      Alert.alert("Error", "No se pudo crear la cuenta. Revisa tu conexión.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleRegister = async () => {
+  // 1. Validación de campos vacíos
+  if (!name.trim() || !email.trim() || !password.trim()) {
+    Alert.alert("Error", "Por favor completa los campos principales.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const usuariosRef = collection(db, "Usuarios");
+
+    // --- NUEVO: VALIDACIÓN DE DUPLICADOS ---
+    
+    // Consulta para el Email
+    const qEmail = query(usuariosRef, where("email", "==", email.toLowerCase().trim()));
+    // Consulta para el Nickname (usamos la variable 'name' que tienes vinculada al input de Nickname)
+    const qNick = query(usuariosRef, where("NickName", "==", name.trim()));
+
+    // Ejecutamos ambas búsquedas al mismo tiempo para ganar velocidad
+    const [querySnapshotEmail, querySnapshotNick] = await Promise.all([
+      getDocs(qEmail),
+      getDocs(qNick)
+    ]);
+
+    if (!querySnapshotEmail.empty) {
+      Alert.alert("Error", "Este correo electrónico ya está registrado.");
+      setLoading(false);
+      return;
+    }
+
+    if (!querySnapshotNick.empty) {
+      Alert.alert("Error", "Este Nickname ya está en uso. Elige otro.");
+      setLoading(false);
+      return;
+    }
+    // ---------------------------------------
+    const randomIndex = Math.floor(Math.random() * portraits.length);
+    var selectedImage = portraits[randomIndex];
+    console.log(selectedImage)
+    // 2. Si pasó las validaciones, procedemos a guardar
+    await addDoc(usuariosRef, {
+      Name: name, // Aquí puedes usar una variable para nombre real si añades el input
+      NickName: name.trim(), 
+      email: email.toLowerCase().trim(),
+      image: selectedImage, // Tu link por defecto
+      password: password, 
+      empresa: empresa,
+      role: role,
+      createdAt: serverTimestamp()
+    });
+
+    Alert.alert("¡Éxito!", "Cuenta creada correctamente.");
+    router.replace('/Login');
+
+  } catch (error) {
+    console.error("Error al registrar:", error);
+    Alert.alert("Error", "No se pudo conectar con el servidor.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
       <StatusBar 
-  barStyle={'light-content'} 
-  backgroundColor={'transparent'} 
-  translucent={true} 
-/>
+          barStyle={'light-content'} 
+          backgroundColor={'transparent'} 
+          translucent={true} 
+        />
+         <TouchableOpacity 
+                    style={[{backgroundColor: 'rgba(255, 255, 255, 0)', position:'absolute', zIndex:5},{left:11, top:60}]} 
+                    onPress={() => router.replace('/pages/Navigation')}
+                >
+                    <Ionicons name="chevron-back" size={30} color={'#ffff'} />
+          </TouchableOpacity>
       
       <LinearGradient
         colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]}
@@ -80,22 +202,10 @@ export default function Register() {
         </View>
 
         <ScrollView 
-          contentContainerStyle={{ flexGrow: 1, paddingTop: '65%' }}
+          contentContainerStyle={{ flexGrow: 1, paddingTop: '50%' }}
           showsVerticalScrollIndicator={false}
         >
-          {/* --- IMÁGENES (zIndex superior a las burbujas) --- */}
-          <Image 
-            source={require('../assets/img/inmifriend.png')} 
-            style={{ position: 'absolute', zIndex: 1, width: 160, height: 160, left: '26%', top: '18%' }} 
-          />
-          <Image 
-            source={require('../assets/img/brujula.png')} 
-            style={{ position: 'absolute', zIndex: 1, width: 130, height: 130, left: '74%', top: '2%' }} 
-          />
-          <Image 
-            source={require('../assets/img/triangulo.png')} 
-            style={{ position: 'absolute', zIndex: 1, width: 140, height: 140, left: '-10%', top: '26%' }} 
-          />
+    
 
           {/* --- FORMULARIO BLANCO --- */}
           <View style={{ 
@@ -113,7 +223,9 @@ export default function Register() {
               </View>
                 <TextInput 
                   style={{  fontSize: 14, width:'80%',textAlignVertical: 'center'}} 
-                  placeholder="Nombre Completo" 
+                  placeholder="Nickname" 
+                  value={name}
+                  onChangeText={setName}
                 ></TextInput>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 , width:'100%',borderBottomColor: '#EEE',borderBottomWidth: 1, paddingVertical:10}}>
@@ -124,6 +236,10 @@ export default function Register() {
                 <TextInput 
                   style={{  fontSize: 14, width:'80%',textAlignVertical: 'center'}} 
                   placeholder="email" 
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
                 ></TextInput>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#EEE', marginBottom: 15, paddingVertical:10 }}>
@@ -135,6 +251,8 @@ export default function Register() {
                 style={{ flex: 1, paddingVertical: 10, fontSize: 14 }} 
                 placeholder="password" 
                 secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
               />
               {/* Botón del Ojo */}
               <TouchableOpacity style={{marginLeft:-10}} onPress={() => setShowPassword(!showPassword)}>
@@ -149,8 +267,13 @@ export default function Register() {
           <View style={{ justifyContent: 'flex-end', height:'20%'}}>
            
 
-            <TouchableOpacity onPress={()=>{alert('creaste tu cuenta'), router.replace('/Login')}} style={{ backgroundColor: theme.button, padding: 15, borderRadius: 15, alignItems: 'center' }}>
-              <Text style={{ color: 'white', fontWeight: 'bold' }}>Register</Text>
+            <TouchableOpacity onPress={handleRegister} 
+              disabled={loading} style={{ backgroundColor: theme.button, padding: 15, borderRadius: 15, alignItems: 'center' }}>
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Register</Text>
+              )}
             </TouchableOpacity>
             
             <View style={{width: 320,marginTop: 20,display: "flex",flexDirection: "row",justifyContent: "center",alignItems: "center",}}>

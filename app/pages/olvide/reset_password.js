@@ -16,7 +16,11 @@ export default function ForgotPassword() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+      <StatusBar 
+  barStyle="light-content" 
+  backgroundColor="#B85CFB" 
+  translucent={true} // Esto ayuda a Android a gestionar el dibujado
+/>
       <View style={styles.content}>
         <Text style={styles.title}>Reset your password</Text>
         <Text style={styles.subtitle}>Please enter your new password</Text>

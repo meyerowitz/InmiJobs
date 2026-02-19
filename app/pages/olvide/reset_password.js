@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Para los iconos de candado y ojo
 import { useTheme } from '../../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from 'expo-status-bar';
 
 export default function ForgotPassword() {
   const [password, setPassword] = useState('');
@@ -15,12 +16,12 @@ export default function ForgotPassword() {
   const hasNumber = /\d/.test(password);
 
   return (
+    <>
+     <StatusBar 
+                 style="light" backgroundColor={'#B85CFB'}
+                 translucent={false}
+              />
     <SafeAreaView style={styles.container}>
-      <StatusBar 
-  barStyle="light-content" 
-  backgroundColor="#B85CFB" 
-  translucent={true} // Esto ayuda a Android a gestionar el dibujado
-/>
       <View style={styles.content}>
         <Text style={styles.title}>Reset your password</Text>
         <Text style={styles.subtitle}>Please enter your new password</Text>
@@ -77,6 +78,7 @@ export default function ForgotPassword() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    </>
   );
 }
 

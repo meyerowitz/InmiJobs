@@ -31,8 +31,8 @@ const SplashScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
               <StatusBar 
-              barStyle="light-content" 
-              backgroundColor="#f90000" 
+              style="dark"
+              backgroundColor="#ffffff" 
             />
       <Animated.Image
         source={require('../assets/img/imagotipo.png')} // Tu imagen aquí

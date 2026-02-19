@@ -8,12 +8,48 @@ import {
   TouchableOpacity, 
   TouchableWithoutFeedback, 
   KeyboardAvoidingView, 
-  Platform 
+  Platform,
+  ActivityIndicator
 } from 'react-native';
+import { useUser } from '../Data/DataProvider'; // Tu hook
+import { db } from '../../../firebaseConfig'; // Tu archivo de config de Firebase
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-export default function newPost({ visible, onClose }) {
-  const [text, setText] = useState('');
+export default function NewPost({ visible, onClose }) {
+ const [text, setText] = useState('');
+  const [isPublishing, setIsPublishing] = useState(false);
+  const { userData } = useUser(); // Obtenemos el usuario del Provider
 
+  const handlePublish = async () => {
+    if (!text.trim() || !userData) return;
+
+    setIsPublishing(true);
+    try {
+      // Estructura de la tabla "Post"
+      const postData = {
+        userId: userData.id || userData.uid, // ID del autor
+        userName: userData.name || 'Usuario', // Opcional: para no hacer tantos joins
+        userImage: userData.image || '',      // Opcional: imagen del autor
+        createdAt: serverTimestamp(),         // Fecha oficial de Firebase
+        description: text,
+        likesCount: 0,
+        commentsCount: 0,
+        commentsData: [],                     // Array de comentarios (vacío al inicio)
+        sharesCount: 0,
+        media: [],                            // Espacio para array de imágenes/archivos
+      };
+
+      await addDoc(collection(db, "Post"), postData);
+      
+      setText(''); // Limpiar input
+      onClose();   // Cerrar modal
+    } catch (error) {
+      console.error("Error al guardar el post: ", error);
+      alert("No se pudo publicar. Intenta de nuevo.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
   return (
     <Modal
       animationType="slide"
@@ -74,15 +110,20 @@ export default function newPost({ visible, onClose }) {
               </View>
 
               {/* Botón Publicar */}
+            {/* Botón Publicar */}
               <TouchableOpacity 
-                style={[styles.publishButton, !text && styles.publishButtonDisabled]}
-                disabled={!text}
+                style={[styles.publishButton, (!text || isPublishing) && styles.publishButtonDisabled]}
+                onPress={handlePublish}
+                disabled={!text || isPublishing}
               >
-                <Text style={[styles.publishText, !text && styles.publishTextDisabled]}>
-                  Publicar
-                </Text>
+                {isPublishing ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={[styles.publishText, !text && styles.publishTextDisabled]}>
+                    Publicar
+                  </Text>
+                )}
               </TouchableOpacity>
-
             </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
         </View>

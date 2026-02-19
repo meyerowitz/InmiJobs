@@ -53,7 +53,7 @@ function CustomDrawerContent(props) {
           </View>
         </View>
         <Text style={styles.userNameText}>{userData?.name || 'Bogdan Nikitin'}</Text>
-        <Text style={styles.userTagText}>@{userData?.NickName || 'nikitinteam'}</Text>
+        <Text style={styles.userTagText}>{userData.email || 'nikitinteam'}</Text>
       </View>
 
       {/* Items del Menú (Estilo de la imagen) */}
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
   userTagText: {
-    fontSize: 14,
+    fontSize: 10,
     color: '#999',
     marginTop: 2,
   },

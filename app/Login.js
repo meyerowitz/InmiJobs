@@ -140,6 +140,7 @@ export default function Login() {
       const sessionData = {
         id: user._id,
         name: user.Name,
+        email:user.email,
         role: user.role,
         image: user.image,
         empresa: user.empresa,
@@ -195,6 +196,7 @@ const handleLoginCloud = async () => {
         const sessionData = {
           id: userId,
           name: userCloud.Name,
+          email:userCloud.email,
           role: userCloud.role,
           image: userCloud.image || null,
           empresa: userCloud.empresa,
@@ -223,8 +225,7 @@ const handleLoginCloud = async () => {
 
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
           <StatusBar 
-        barStyle="light-content" 
-        backgroundColor="#f90000" 
+         style="light" backgroundColor={'#B85CFB'}
       />
       
       <LinearGradient

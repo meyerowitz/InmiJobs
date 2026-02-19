@@ -79,6 +79,7 @@ export default function Register() {
   const [role, setRole] = useState('User');
   const [loading, setLoading] = useState(false);
 
+  const [randomPortrait, SetrandomPortrait] =useState('');
   const router = useRouter();
   const handleRegister2 = async () => {
     // 1. Validación básica
@@ -150,14 +151,14 @@ export default function Register() {
     }
     // ---------------------------------------
     const randomIndex = Math.floor(Math.random() * portraits.length);
-    var selectedImage = portraits[randomIndex];
-    console.log(selectedImage)
+    SetrandomPortrait(portraits[randomIndex]);
+    console.log( randomIndex)
     // 2. Si pasó las validaciones, procedemos a guardar
     await addDoc(usuariosRef, {
       Name: name, // Aquí puedes usar una variable para nombre real si añades el input
       NickName: name.trim(), 
       email: email.toLowerCase().trim(),
-      image: selectedImage, // Tu link por defecto
+      image: randomPortrait, // Tu link por defecto
       password: password, 
       empresa: empresa,
       role: role,

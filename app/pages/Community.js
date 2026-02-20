@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity , StatusBar, Keyboard} from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity , StatusBar, Keyboard,Modal} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { userData, useUser } from '../Components/Data/DataProvider';
 import NewPost from '../Components/Modales/newPost'
 import { db } from '../../firebaseConfig'; 
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, deleteDoc,updateDoc, increment,arrayUnion, arrayRemov } from 'firebase/firestore';
 
 // Datos de ejemplo para los posts
 const POSTS = [
@@ -49,6 +49,19 @@ export default function Community() {
 
     const [expandedPostId, setExpandedPostId] = useState(null);
 
+    const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+
+const openMenu = (event, post) => {
+  // Obtenemos la posición del clic en la pantalla
+  const { pageY, pageX } = event.nativeEvent;
+  
+  setSelectedPost(post);
+  // Ajustamos la posición para que el menú salga un poco abajo y a la izquierda del dedo
+  setMenuPosition({ top: pageY + 10, right: 20 }); 
+  setMenuVisible(true);
+};
     const toggleComments = (postId) => {
   if (expandedPostId === postId) {
     setExpandedPostId(null); // Si ya estaba abierto, lo cerramos
@@ -56,7 +69,51 @@ export default function Community() {
     setExpandedPostId(postId); // Si no, abrimos los de este post
   }
 };
+const handleDeletePost = async () => {
+  if (!selectedPost) return;
 
+  try {
+    // Referencia al documento específico en la colección "Post"
+    const postRef = doc(db, "Post", selectedPost.id);
+    await deleteDoc(postRef);
+    
+    // Cerramos el menú
+    setMenuVisible(false);
+    setSelectedPost(null);
+    console.log("Post eliminado con éxito");
+  } catch (error) {
+    console.error("Error al eliminar el post: ", error);
+    alert("No se pudo eliminar la publicación.");
+  }
+};
+const handleLike = async (postId, likedByArray = []) => {
+  if (!userData) return;
+  
+  // El ID del usuario actual (tú)
+  const myId = userData.id || userData.uid;
+  const postRef = doc(db, "Post", postId);
+
+  // ¿Ya le di like?
+  const hasLiked = likedByArray.includes(myId);
+
+  try {
+    if (hasLiked) {
+      // Si ya tiene mi like, lo quito
+      await updateDoc(postRef, {
+        likedBy: arrayRemove(myId),
+        likesCount: increment(-1) // Bajamos el contador
+      });
+    } else {
+      // Si no tiene mi like, lo pongo
+      await updateDoc(postRef, {
+        likedBy: arrayUnion(myId),
+        likesCount: increment(1) // Subimos el contador
+      });
+    }
+  } catch (error) {
+    console.error("Error en el Like:", error);
+  }
+};
   if (!userData) return <Text>No hay sesión activa</Text>;
 
   const renderPost = ({ item }) => {
@@ -118,13 +175,12 @@ export default function Community() {
     </View>
   )};
 const renderPost2 = ({ item }) => {
-  // MUY IMPORTANTE: Usa item.id para el toggle, no item.user_id
   const isExpanded = expandedPostId === item.id; 
-
+  const isMyPost = item.userId === (userData?.id || userData?.uid);
+  
   return (
     <View style={styles.postContainer}>
       <View style={styles.postHeader}>
-        {/* Usamos los campos exactos de tu captura de pantalla */}
         <Image source={{ uri: item.userImage }} style={styles.avatar} />
         <View>
           <Text style={styles.userName}>{item.userName}</Text>
@@ -132,19 +188,43 @@ const renderPost2 = ({ item }) => {
             {item.createdAt?.toDate().toLocaleDateString() || 'Reciente'} • <Ionicons name="earth" size={12} />
           </Text>
         </View>
+         {isMyPost && (
+          <TouchableOpacity onPress={(event) => openMenu(event, item)} style={{ padding: 5,marginLeft:'50%' }}>
+              <Ionicons name="ellipsis-vertical" size={22} color="#65676b" />
+          </TouchableOpacity>
+          )}
       </View>
 
-      {/* En Firebase el texto está en 'description' */}
       <Text style={styles.postContent}>{item.description}</Text>
 
-      {/* Botones de Acción con los contadores de Firebase */}
+      {/* --- NUEVA SECCIÓN DE IMAGEN --- */}
+      {/* Verificamos si item.media existe y tiene al menos una URL */}
+      {item.media && item.media.length > 0 && item.media[0] ? (
+        <Image 
+          source={{ uri: item.media[0] }} 
+          style={styles.postImage} 
+          resizeMode="cover"
+        />
+      ) : null}
+      {/* ------------------------------- */}
+
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="thumbs-up-outline" size={20} color="#65676b" />
-          <Text style={styles.actionText}>
-            {item.likesCount > 0 ? item.likesCount : 'Me gusta'}
-          </Text>
-        </TouchableOpacity>
+        <TouchableOpacity 
+  style={styles.actionButton} 
+  onPress={() => handleLike(item.id, item.likedBy)}
+>
+  <Ionicons 
+    name={item.likesCount > 0 ? "thumbs-up" : "thumbs-up-outline"} 
+    size={20} 
+    color={item.likesCount > 0 ? "#1877f2" : "#65676b"} 
+  />
+  <Text style={[
+    styles.actionText, 
+    { color: item.likesCount > 0 ? "#1877f2" : "#65676b" }
+  ]}>
+    {item.likesCount > 0 ? item.likesCount : 'Me gusta'}
+  </Text>
+</TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => toggleComments(item.id)}>
           <Ionicons name="chatbubble-outline" size={20} color="#65676b" />
@@ -152,17 +232,18 @@ const renderPost2 = ({ item }) => {
             {item.commentsCount > 0 ? item.commentsCount : 'Comentar'}
           </Text>
         </TouchableOpacity>
-        
-        {/* ... resto de botones ... */}
-      </View>
 
-      {/* Sección de comentarios desplegable */}
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="share-social-outline" size={20} color="#65676b" />
+          <Text style={styles.actionText}>Compartir</Text>
+        </TouchableOpacity>
+      </View>
+     
       {isExpanded && (
         <View style={styles.commentsSection}>
           {item.commentsData && item.commentsData.length > 0 ? (
             item.commentsData.map((comment, index) => (
               <View key={index} style={styles.commentItem}>
-                {/* Aquí puedes poner lógica para el avatar del comentador */}
                 <View style={styles.commentBubble}>
                   <Text style={styles.commentUser}>{comment.user}</Text>
                   <Text style={styles.commentText}>{comment.text}</Text>
@@ -174,10 +255,43 @@ const renderPost2 = ({ item }) => {
           )}
         </View>
       )}
+{/* Submenú Desplegable */}
+<Modal
+  visible={menuVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => setMenuVisible(false)}
+>
+  {/* Este Touchable ocupa toda la pantalla para que al tocar fuera se cierre */}
+  <TouchableOpacity 
+    style={styles.invisibleOverlay} 
+    activeOpacity={1} 
+    onPress={() => setMenuVisible(false)}
+  >
+    <View style={[styles.subMenu, { top: menuPosition.top, right: menuPosition.right }]}>
+      <TouchableOpacity 
+        style={styles.subMenuOption} 
+        onPress={() => { /* Tu lógica de editar */ setMenuVisible(false); }}
+      >
+        <Ionicons name="pencil-outline" size={18} color="#1c1e21" />
+        <Text style={styles.subMenuText}>Editar</Text>
+      </TouchableOpacity>
+
+      <View style={styles.subMenuDivider} />
+
+      <TouchableOpacity 
+        style={styles.subMenuOption} 
+        onPress={handleDeletePost}
+      >
+        <Ionicons name="trash-outline" size={18} color="#e11d48" />
+        <Text style={[styles.subMenuText, { color: '#e11d48' }]}>Eliminar</Text>
+      </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
+</Modal>
     </View>
   );
 };
-
   useEffect(() => {
     if (!userData) return;
 
@@ -294,4 +408,75 @@ const styles = StyleSheet.create({
   actionButtons: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 5 },
   actionButton: { flexDirection: 'row', alignItems: 'center' },
   actionText: { marginLeft: 5, color: '#65676b', fontWeight: '600' },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)', // Fondo oscuro traslúcido
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 10,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  menuOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+  },
+  menuOptionText: {
+    fontSize: 16,
+    marginLeft: 15,
+    fontWeight: '500',
+    color: '#1c1e21',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginHorizontal: 10,
+  },
+  invisibleOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent', // Sin fondo oscuro para que parezca un submenú real
+  },
+  subMenu: {
+    position: 'absolute',
+    width: 150,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingVertical: 5,
+    // Sombra para que resalte sobre el post
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginTop:-19
+  },
+  subMenuOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    
+  },
+  subMenuText: {
+    fontSize: 15,
+    marginLeft: 10,
+    fontWeight: '500',
+    color: '#1c1e21',
+  },
+  subMenuDivider: {
+    height: 1,
+    backgroundColor: '#f0f2f5',
+    marginHorizontal: 10,
+  },
 });

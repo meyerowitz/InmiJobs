@@ -7,14 +7,15 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { db } from '../../../firebaseConfig'; 
 import { doc, updateDoc } from 'firebase/firestore';
+import { useUser } from '../Data/DataProvider';
 
 const IMGBB_API_KEY = process.env.EXPO_PUBLIC_IMGBB_API_KEY;
 
-export default function newPortrait({ visible, onClose, userData, mode }) {
-
+export default function newPortrait({ visible, onClose, mode }) {
+  const { userData, setUserData } = useUser();
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-
+  
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -58,15 +59,21 @@ export default function newPortrait({ visible, onClose, userData, mode }) {
       const imageUrl = await uploadToImgBB(selectedImage);
       if (!imageUrl) throw new Error("Error al subir");
 
-      const userRef = doc(db, "Users", userData.id || userData.uid);
-      
+      const userRef = doc(db, "Usuarios", userData.id || userData.uid);
+      const atributoASustituir = mode === 'profile' ? 'image' : 'banner';
       // Actualizamos dinámicamente según el modo
       const updateData = mode === 'profile' 
         ? { image: imageUrl } 
-        : { coverImage: imageUrl };
+        : { banner: imageUrl };
 
       await updateDoc(userRef, updateData);
-      
+      // 2. ACTUALIZAR ESTADO GLOBAL (La clave del éxito)
+      // Mantenemos todo lo que tenía userData y solo sobreescribimos el campo editado
+      setUserData(prev => ({
+        ...prev,
+        [atributoASustituir]: imageUrl
+      }));
+
       Alert.alert("Éxito", "Imagen actualizada correctamente");
       setSelectedImage(null);
       onClose();

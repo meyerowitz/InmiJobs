@@ -161,7 +161,7 @@ const handleLoginCloud = async () => {
           role: userCloud.role,
           image: userCloud.image || null,
           banner:userCloud.banner,
-          description:userCloud.description,
+          description: userCloud.description,
           countFriends: userCloud.countFriends,
           countPost:userCloud.countPost,
           empresa: userCloud.empresa,

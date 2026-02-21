@@ -315,7 +315,7 @@ const renderPost2 = ({ item }) => {
           
            <Text style={{fontSize: 28, fontWeight: 'bold', color: '#1877f2', letterSpacing: -1 , marginLeft:50, marginRight:10}}>InmiJobs</Text>
            <View style={{ flexDirection: 'row' }}>
-             <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 90, marginLeft: 10}}><Ionicons name="search" size={19} /></TouchableOpacity>
+             <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 90, marginLeft: '30%'}}><Ionicons name="search" size={19} /></TouchableOpacity>
              <TouchableOpacity onPress={()=>{router.replace('/pages/profile')}} style={{padding:3, backgroundColor:'white', borderRadius:90, elevation:10, marginLeft:10}}><Image source={{ uri: userData.image}} style={styles.avatar} /></TouchableOpacity>
            </View>
          </View>

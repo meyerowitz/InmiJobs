@@ -22,6 +22,7 @@ export default function Profile() {
   const [newPostModal, setnewPostModal] = useState(false);
   const [mediaModal, setMediaModal] = useState(false);
   const [mediaMode, setMediaMode] = useState('profile'); // 'profile' o 'cover'
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const openEditMedia = (mode) => {
     setMediaMode(mode);
@@ -53,6 +54,7 @@ export default function Profile() {
 
   // 2. Render de cada Post (usando tu lógica de Community)
   const renderMyPost = ({ item }) => {
+    const isMyPost = item.userId === (userData?.id || userData?.uid);
     const isExpanded = expandedPostId === item.id;
     return (
       <View style={styles.postContainer}>
@@ -66,7 +68,16 @@ export default function Profile() {
           </View>
         </View>
         <Text style={styles.postContent}>{item.description}</Text>
-        
+         {/* --- NUEVA SECCIÓN DE IMAGEN --- */}
+              {/* Verificamos si item.media existe y tiene al menos una URL */}
+              {item.media && item.media.length > 0 && item.media[0] ? (
+                <Image 
+                  source={{ uri: item.media[0] }} 
+                  style={{ width: '100%', height: 300}} 
+                  resizeMode="cover"
+                />
+              ) : null}
+              {/* ------------------------------- */}
         {/* Botones de Acción */}
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton}>
@@ -114,7 +125,7 @@ export default function Profile() {
     </TouchableOpacity>
       <View style={styles.mainInfo}>
         <Text style={styles.userName}>{userData.name} <Ionicons name="chevron-down" size={18} /></Text>
-        <Text style={styles.statsSummary}>{myPosts.length} publicaciones {userData.countPost} · {userData.countFriends} amigos</Text>
+        <Text style={styles.statsSummary}>{myPosts.length} publicaciones · {userData.countFriends} amigos</Text>
         <TouchableOpacity>
         <Text style={styles.bioText}>
           {userData.description} <TouchableOpacity><Text style={styles.seeMore}>Ver más</Text></TouchableOpacity>
@@ -126,14 +137,36 @@ export default function Profile() {
             <Ionicons name="add" size={20} color="#fff" />
             <Text style={styles.blueButtonText}>Agregar Publicación</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.grayButton}>
+          <TouchableOpacity style={styles.grayButton} onPress={() => setShowDropdown(!showDropdown)}>
             <Ionicons name="pencil" size={18} color="#000" />
             <Text style={styles.grayButtonText}>Editar perfil</Text>
           </TouchableOpacity>
         </View>
       </View>
-
+        {/* VISTA DESPLEGABLE */}
+          {showDropdown && (
+            <View style={{backgroundColor: '#fff',width: '100%'}}>
+              <TouchableOpacity 
+                style={{flexDirection: 'row',alignItems: 'center',padding: 12,}} 
+                onPress={() => { handleEditName(); setShowDropdown(false); }}
+              >
+                <Ionicons name="text" size={16} color="#1c1e21" />
+                <Text style={{fontSize: 14,marginLeft: 10,color: '#1c1e21',fontWeight: '500',}}>Nickname</Text>
+              </TouchableOpacity>
+              
+              <View style={{height: 1, backgroundColor: '#E4E6EB',}} />
+              
+              <TouchableOpacity 
+                style={{flexDirection: 'row',alignItems: 'center',padding: 12,}} 
+                onPress={() => { handleEditBio(); setShowDropdown(false); }}
+              >
+                <Ionicons name="information-circle-outline" size={16} color="#1c1e21" />
+                <Text style={{flexDirection: 'row',alignItems: 'center',padding: 12,}}>Descripción</Text>
+              </TouchableOpacity>
+            </View>
+          )}
       <View style={styles.divider} />
+
       <Text style={[styles.sectionTitle, {marginLeft: 20, marginBottom: 10}]}>Tus publicaciones</Text>
     </View>
   );
@@ -142,11 +175,10 @@ export default function Profile() {
     <SafeAreaView style={styles.container}>
        <StatusBar 
                                   barStyle={'light-content'} 
-                                  backgroundColor={'red'} 
-                                  translucent={false} 
+                                  translucent={true} 
                                 />
                    <StatusBar_Fix></StatusBar_Fix>
-
+      <ScrollView contentContainerStyle={{minHeight:'110%',flexGrow: 1}}>
       <FlatList
         data={myPosts}
         keyExtractor={(item) => item.id}
@@ -160,9 +192,9 @@ export default function Profile() {
       <NewPortrait
         visible={mediaModal} 
         onClose={() => setMediaModal(false)} 
-        userData={userData}
         mode={mediaMode}
       />
+      </ScrollView>
     </SafeAreaView>
   );
 }

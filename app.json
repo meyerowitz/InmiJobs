@@ -17,12 +17,8 @@
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/img/foreground.png"
       },
-      "androidStatusBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#B85CFB",
-      "translucent": false
-      },
-      "edgeToEdgeEnabled": true,
+       "softwareKeyboardLayoutMode": "pan",
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.rbkmeyer.InmiJobs"
     },

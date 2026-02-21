@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TextInput, TouchableOpacity, ScrollView, Dimensions, Image, Animated, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView ,useSafeAreaInsets} from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Lock, EyeOff, Eye } from 'lucide-react-native';
 import { useTheme } from './Components/Temas_y_colores/ThemeContext';
@@ -67,50 +67,9 @@ export default function Login() {
   const [passwordInput, setPasswordInput] = useState('');
   const { setUserData } = useUser();
   const [loading, setLoading] = useState(false);
-  const handleLogin = async () => {
-    try {
-    // Validamos que no estén vacíos
-    if (!userInput || !passwordInput) {
-      Alert.alert("Atención", "Por favor, completa todos los campos.");
-      return;
-    }
+  const insets = useSafeAreaInsets();
 
-    // Buscamos al usuario por Email o NickName
-    const user = usersData.users.find(u => 
-      (u.email.toLowerCase() === userInput.toLowerCase() || u.NickName === userInput) && 
-      u.password === passwordInput
-    );
 
-    if (user) {
-      // 3. BORRAR SESIÓN PREVIA (Si existe, se sobreescribe o elimina)
-      await AsyncStorage.removeItem('@session');
-
-      // 4. CREAR EL OBJETO DE SESIÓN
-      const sessionData = {
-        id: user._id,
-        name: user.Name,
-        role: user.role,
-        empresa: user.empresa,
-        loginAt: new Date().toISOString()
-      };
-
-      // 5. GUARDAR EN ASYNC STORAGE
-      // Convertimos el objeto a String porque AsyncStorage solo guarda texto
-      await AsyncStorage.setItem('@session', JSON.stringify(sessionData));
-
-      Alert.alert("Éxito", `Bienvenido ${user.Name}`);
-      
-      // 6. REDIRIGIR
-      router.replace('/pages/Navigation');
-      
-    } else {
-      Alert.alert("Error", "Usuario o contraseña incorrectos.");
-    }}catch (error) {
-    console.log("Error en el login:", error);
-    Alert.alert("Error", "Hubo un problema al guardar la sesión.");
-  }
-
-  };
   const handleLogin2 = async () => {
   try {
     // 1. Verificación básica de inputs
@@ -164,6 +123,8 @@ export default function Login() {
 };
 const handleLoginCloud = async () => {
   try {
+    const cleanUser = userInput.trim(); 
+    const cleanPass = passwordInput.trim();
     if (!userInput.trim() || !passwordInput.trim()) {
       Alert.alert("Atención", "Por favor, completa los campos para buscar en la nube.");
       return;
@@ -175,9 +136,9 @@ const handleLoginCloud = async () => {
     const usuariosRef = collection(db, "Usuarios");
     
     // Consulta A: Por Email
-    const qEmail = query(usuariosRef, where("email", "==", userInput.toLowerCase().trim()));
+    const qEmail = query(usuariosRef, where("email", "==", cleanUser.toLowerCase()));
     // Consulta B: Por NickName
-    const qNick = query(usuariosRef, where("NickName", "==", userInput));
+    const qNick = query(usuariosRef, where("NickName", "==", cleanUser));
 
     const [snapEmail, snapNick] = await Promise.all([getDocs(qEmail), getDocs(qNick)]);
     
@@ -199,6 +160,10 @@ const handleLoginCloud = async () => {
           email:userCloud.email,
           role: userCloud.role,
           image: userCloud.image || null,
+          banner:userCloud.banner,
+          description:userCloud.description,
+          countFriends: userCloud.countFriends,
+          countPost:userCloud.countPost,
           empresa: userCloud.empresa,
           loginAt: new Date().toISOString()
         };
@@ -206,27 +171,27 @@ const handleLoginCloud = async () => {
         await AsyncStorage.setItem('@session', JSON.stringify(sessionData));
         setUserData(sessionData);
         setLoading(false)
-        Alert.alert("Éxito (Cloud)", `Bienvenido de nuevo, ${userCloud.Name}`);
+        //Alert.alert("Éxito (Cloud)", `Bienvenido de nuevo, ${userCloud.Name}`);
         router.replace('/pages/Navigation');
       } else {
-        Alert.alert("Error", "La contraseña de la nube no coincide.");
+        Alert.alert("Error", "La contraseña de la nube no coincide.");setLoading(false)
       }
     } else {
-      Alert.alert("No encontrado", "No existe ningún usuario en Firebase con ese Email/NickName.");
+      Alert.alert("No encontrado", "No existe ningún usuario en Firebase con ese Email/NickName.");setLoading(false)
     }
   } catch (error) {
     console.error("Error en Login Cloud:", error);
-    Alert.alert("Error de Conexión", "No se pudo acceder a la base de datos remota.");
+    Alert.alert("Error de Conexión", "No se pudo acceder a la base de datos remota.");setLoading(false)
   }
 };
 
   return (
     <>
-
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
           <StatusBar 
-         style="light" backgroundColor={'#B85CFB'}
+         style="light" backgroundColor={'#ff0000'}  
       />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.gradient[0] }}>
+      
       
       <LinearGradient
         colors={[theme.gradient[0], theme.gradient[1], theme.gradient[1], theme.gradient[1]]}
@@ -264,6 +229,7 @@ const handleLoginCloud = async () => {
             padding: 30, 
             borderTopLeftRadius: 40, 
             borderTopRightRadius: 40, 
+           
             minHeight: height * 0.80 // Ajustado para que cubra el fondo
           }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 25, color: theme.text }}>Login Here</Text>
@@ -280,6 +246,7 @@ const handleLoginCloud = async () => {
                 value={userInput}
                 onChangeText={setUserInput}
                 autoCapitalize="none"
+                autoCorrect={false}
               />
             </View>
 
@@ -296,6 +263,7 @@ const handleLoginCloud = async () => {
                 value={passwordInput}
                 onChangeText={setPasswordInput}
                 autoCapitalize="none"
+                autoCorrect={false}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, Text, View, Image, TouchableOpacity, 
-  ImageBackground, Dimensions, FlatList, StatusBar, Keyboard 
+  ImageBackground, Dimensions, FlatList, StatusBar, Keyboard,ScrollView 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,7 +9,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from '../Components/Data/DataProvider';
 import { db } from '../../firebaseConfig'; 
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
-
+import StatusBar_Fix from '../Components/StatusBar_fix'
+import NewPost from '../Components/Modales/newPost';
+import NewPortrait from '../Components/Modales/newPortrait';
 const { width } = Dimensions.get('window');
 
 export default function Profile() {
@@ -17,17 +19,23 @@ export default function Profile() {
   const { userData } = useUser();
   const [myPosts, setMyPosts] = useState([]);
   const [expandedPostId, setExpandedPostId] = useState(null);
+  const [newPostModal, setnewPostModal] = useState(false);
+  const [mediaModal, setMediaModal] = useState(false);
+  const [mediaMode, setMediaMode] = useState('profile'); // 'profile' o 'cover'
+
+  const openEditMedia = (mode) => {
+    setMediaMode(mode);
+    setMediaModal(true);
+  };
 
   if (!userData) return <Text>No hay sesión activa</Text>;
 
-  // 1. Cargar solo MIS publicaciones de Firebase
   useEffect(() => {
     const q = query(
       collection(db, "Post"),
       where("userId", "==", userData.id || userData.uid), // Filtro: solo mis posts
       orderBy("createdAt", "desc")
     );
-
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const postsArray = [];
       querySnapshot.forEach((doc) => {
@@ -83,37 +91,38 @@ export default function Profile() {
   // 3. Componente de Cabecera (Todo tu diseño anterior)
   const ProfileHeader = () => (
     <View>
-      <ImageBackground 
-        source={{ uri: 'https://picsum.photos/id/122/800/400' }} 
-        style={styles.coverImage}
-      >
-        <TouchableOpacity 
+       <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => router.replace('/pages/Navigation')}
         >
           <Ionicons name="chevron-back" size={30} color={'#fff'} />
         </TouchableOpacity>
-
-        <View style={styles.avatarWrapper}>
+    <TouchableOpacity onPress={() => openEditMedia('cover')}>
+      <ImageBackground 
+        source={{ uri: userData.banner }}
+        style={styles.coverImage}
+      >
+      </ImageBackground>
+    </TouchableOpacity>
+    <TouchableOpacity onPress={() => openEditMedia('profile')}>
+       <View style={{ marginBottom: -50, marginLeft: 20, width: 120, height: 120, marginTop:'-22%' }}>
           <Image source={{ uri: userData.image }} style={styles.profileAvatar} />
           <TouchableOpacity style={styles.cameraIcon}>
             <Ionicons name="camera" size={18} color="#000" />
           </TouchableOpacity>
         </View>
-      </ImageBackground>
-
+    </TouchableOpacity>
       <View style={styles.mainInfo}>
         <Text style={styles.userName}>{userData.name} <Ionicons name="chevron-down" size={18} /></Text>
-        <Text style={styles.statsSummary}>{myPosts.length} publicaciones · 7 amigos</Text>
+        <Text style={styles.statsSummary}>{myPosts.length} publicaciones {userData.countPost} · {userData.countFriends} amigos</Text>
         <TouchableOpacity>
         <Text style={styles.bioText}>
-          UI/UX Designer & Frontend Developer 💻 ✨{"\n"}
-          Especialista en Figma... <TouchableOpacity><Text style={styles.seeMore}>Ver más</Text></TouchableOpacity>
+          {userData.description} <TouchableOpacity><Text style={styles.seeMore}>Ver más</Text></TouchableOpacity>
         </Text>
         </TouchableOpacity>
 
         <View style={styles.actionButtonsRow}>
-          <TouchableOpacity style={styles.blueButton}>
+          <TouchableOpacity style={styles.blueButton} onPress={() =>{ setnewPostModal(true)}}>
             <Ionicons name="add" size={20} color="#fff" />
             <Text style={styles.blueButtonText}>Agregar Publicación</Text>
           </TouchableOpacity>
@@ -131,14 +140,28 @@ export default function Profile() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+       <StatusBar 
+                                  barStyle={'light-content'} 
+                                  backgroundColor={'red'} 
+                                  translucent={false} 
+                                />
+                   <StatusBar_Fix></StatusBar_Fix>
+
       <FlatList
         data={myPosts}
         keyExtractor={(item) => item.id}
         renderItem={renderMyPost}
         ListHeaderComponent={ProfileHeader}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
         ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20}}>No has publicado nada todavía.</Text>}
+      />
+      <NewPost visible={newPostModal} onClose={() =>{ setnewPostModal(false)}} ></NewPost>
+      <NewPortrait
+        visible={mediaModal} 
+        onClose={() => setMediaModal(false)} 
+        userData={userData}
+        mode={mediaMode}
       />
     </SafeAreaView>
   );

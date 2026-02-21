@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TextInput, TouchableOpacity, S
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../Components/Data/DataProvider';
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import StatusBar_Fix from '../Components/StatusBar_fix'
 export default function Amigos() {
   const { theme } = useUser(); // Si tienes el tema en el context, si no usa colores fijos
   const [search, setSearch] = useState('');

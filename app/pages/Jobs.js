@@ -1,10 +1,12 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { userData , useUser} from '../Components/Data/DataProvider';
+import StatusBar_Fix from '../Components/StatusBar_fix'
+import * as Network from 'expo-network';
 // Datos de ejemplo para los posts
 const POSTS = [
   {
@@ -77,11 +79,47 @@ export default function Jobs(){
       </View>
     </View>
   );
+  const [isConnected, setIsConnected] = useState(true);
+
+useEffect(() => {
+  const checkConnection = async () => {
+    const status = await Network.getNetworkStateAsync();
+    // status.isConnected nos dice si el dispositivo tiene el switch de red activo
+    // status.isInternetReachable nos dice si realmente hay internet (Google, etc)
+    setIsConnected(status.isConnected && status.isInternetReachable);
+  };
+
+  checkConnection();
+}, []);
+
+  if(!isConnected){
+    return(
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 80, paddingHorizontal: 40 }}>
+        <Ionicons name="cloud-offline-outline" size={80} color="#ff4444" />
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1c1e21', marginTop: 15 }}>
+            ¡Ups! Sin conexión
+          </Text>
+          <Text style={{ fontSize: 14, color: '#65676b', textAlign: 'center', marginTop: 8 }}>
+            Parece que no tienes internet disponible ahora. Revisa tu configuración y vuelve a intentarlo.
+          </Text>
+        <TouchableOpacity 
+            onPress={() => {/* Aquí podrías reintentar la carga */}}
+            style={{ marginTop: 20, backgroundColor: '#1877f2', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+  )}
 
   return (
     <SafeAreaView style={styles.container}>
 
-            <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+                   <StatusBar 
+                        barStyle={'light-content'} 
+                        backgroundColor={'red'} 
+                        translucent={false} 
+                      />
+                      <StatusBar_Fix></StatusBar_Fix>
       {/* Header Superior */}
       <View style={{flexDirection: 'row',paddingHorizontal: 15,paddingTop: 18.5,paddingBottom: 10, elevation:20}}>
         <Text style={{fontSize: 28, fontWeight: 'bold', color: '#1877f2', letterSpacing: -1 , marginLeft:50, marginRight:10}}>InmiJobs</Text>

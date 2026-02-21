@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity,StatusBar} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../Components/Temas_y_colores/ThemeContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 import {useRouter} from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-
+import StatusBar_Fix from '../../Components/StatusBar_fix'
 export default function VerificationScreen() {
   const [code, setCode] = useState(['8', '8', '7', '6']); // Iniciado con los valores de tu imagen
   const [timer, setTimer] = useState(192); // 03:12 en segundos
@@ -46,12 +45,14 @@ export default function VerificationScreen() {
 
   return (
     <>
-      <StatusBar 
-                 style="light" backgroundColor={'#B85CFB'}
-                 translucent={false}
-              />
-    <SafeAreaView style={styles.container}>
     
+    <SafeAreaView style={styles.container}>
+          <StatusBar 
+                                     barStyle={'light-content'} 
+                                     backgroundColor={'red'} 
+                                     translucent={false} 
+                                   />
+                      <StatusBar_Fix></StatusBar_Fix>
       {/* Botón Volver */}
       <TouchableOpacity onPress={()=>{router.replace('/pages/olvide/forgot_password')}} style={styles.backButton}>
         <Ionicons name="chevron-back" size={24} color="#9E9E9E" />

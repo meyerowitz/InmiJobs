@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, Image, FlatList, TextInput, TouchableOpacity , 
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView,useSafeAreaInsets } from "react-native-safe-area-context";
 import { userData, useUser } from '../Components/Data/DataProvider';
 import NewPost from '../Components/Modales/newPost'
 import { db } from '../../firebaseConfig'; 
 import { collection, query, where, onSnapshot, orderBy, doc, deleteDoc,updateDoc, increment,arrayUnion, arrayRemov } from 'firebase/firestore';
+import * as Network from 'expo-network';
 
+import StatusBar_Fix from '../Components/StatusBar_fix'
 // Datos de ejemplo para los posts
 const POSTS = [
   {
@@ -45,15 +47,27 @@ export default function Community() {
    const router = useRouter();
    const { userData, logout } = useUser();
    const [newPostModal, setnewPostModal] = useState(false);
-   const [posts, setPosts] = useState([]); // Nuevo estado para los posts de Firebase
+   const [posts, setPosts] = useState([]);
 
     const [expandedPostId, setExpandedPostId] = useState(null);
-
+    const { theme, isDark } = useTheme();
     const [menuVisible, setMenuVisible] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+    const [isConnected, setIsConnected] = useState(true);
 
-const openMenu = (event, post) => {
+    useEffect(() => {
+    const checkConnection = async () => {
+      const status = await Network.getNetworkStateAsync();
+    // status.isConnected nos dice si el dispositivo tiene el switch de red activo
+    // status.isInternetReachable nos dice si realmente hay internet (Google, etc)
+      setIsConnected(status.isConnected && status.isInternetReachable);
+      };
+
+      checkConnection();
+    }, []);
+
+    const openMenu = (event, post) => {
   // Obtenemos la posición del clic en la pantalla
   const { pageY, pageX } = event.nativeEvent;
   
@@ -61,15 +75,15 @@ const openMenu = (event, post) => {
   // Ajustamos la posición para que el menú salga un poco abajo y a la izquierda del dedo
   setMenuPosition({ top: pageY + 10, right: 20 }); 
   setMenuVisible(true);
-};
+    };
     const toggleComments = (postId) => {
   if (expandedPostId === postId) {
     setExpandedPostId(null); // Si ya estaba abierto, lo cerramos
   } else {
     setExpandedPostId(postId); // Si no, abrimos los de este post
   }
-};
-const handleDeletePost = async () => {
+    };
+    const handleDeletePost = async () => {
   if (!selectedPost) return;
 
   try {
@@ -85,8 +99,8 @@ const handleDeletePost = async () => {
     console.error("Error al eliminar el post: ", error);
     alert("No se pudo eliminar la publicación.");
   }
-};
-const handleLike = async (postId, likedByArray = []) => {
+    };
+    const handleLike = async (postId, likedByArray = []) => {
   if (!userData) return;
   
   // El ID del usuario actual (tú)
@@ -113,67 +127,37 @@ const handleLike = async (postId, likedByArray = []) => {
   } catch (error) {
     console.error("Error en el Like:", error);
   }
-};
-  if (!userData) return <Text>No hay sesión activa</Text>;
-
-  const renderPost = ({ item }) => {
-    const isExpanded = expandedPostId === item.id;
-    return(
-    <View style={styles.postContainer}>
-      {/* Cabecera del Post */}
-      <View style={styles.postHeader}>
-        <TouchableOpacity onPress={()=>{router.replace('/pages/feed')}}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        </TouchableOpacity>
-        <View>
-          <Text style={styles.userName}>{item.user}</Text>
-          <Text style={styles.postTime}>{item.time} • <Ionicons name="earth" size={12} /></Text>
-        </View>
-      </View>
-
-      {/* Contenido del Post */}
-      <Text style={styles.postContent}>{item.content}</Text>
-      {item.image && <Image source={{ uri: item.image }} style={styles.postImage} />}
-
-
-      {/* Botones de Acción */}
-      <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="thumbs-up-outline" size={20} color="#65676b" />
-          <Text style={styles.actionText}>{ item.likes ? item.likes : 'Me gusta'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleComments(item.id)}>
-          <Ionicons name="chatbubble-outline" size={20} color="#65676b" />
-          <Text style={styles.actionText}>Comentar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-social-outline" size={20} color="#65676b" />
-          <Text style={styles.actionText}>Compartir</Text>
-        </TouchableOpacity>
-      </View>
-      {/* SECCIÓN DESPLEGABLE DE COMENTARIOS */}
-      {isExpanded && (
-        <View style={styles.commentsSection}>
-          {/* Ejemplo de lista de comentarios (puedes usar un .map aquí) */}
-          <View style={styles.commentItem}>
-            <Image source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} style={styles.commentAvatar} />
-            <View style={styles.commentBubble}>
-              <Text style={styles.commentUser}>Juan Pérez</Text>
-              <Text style={styles.commentText}>¡Excelente post! Me sirvió mucho.</Text>
-            </View>
+    };
+    if (!userData) return <Text>No hay sesión activa</Text>;
+    if(!isConnected){
+        return(
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 80, paddingHorizontal: 40 }}>
+            <Ionicons name="cloud-offline-outline" size={80} color="#ff4444" />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1c1e21', marginTop: 15 }}>
+                ¡Ups! Sin conexión
+              </Text>
+              <Text style={{ fontSize: 14, color: '#65676b', textAlign: 'center', marginTop: 8 }}>
+                Parece que no tienes internet disponible ahora. Revisa tu configuración y vuelve a intentarlo.
+              </Text>
+            <TouchableOpacity 
+                onPress={() => {/* Aquí podrías reintentar la carga */}}
+                style={{ marginTop: 20, backgroundColor: '#1877f2', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}
+            >
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Reintentar</Text>
+            </TouchableOpacity>
           </View>
-          
-          <View style={styles.commentItem}>
-            <Image source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} style={styles.commentAvatar} />
-            <View style={styles.commentBubble}>
-              <Text style={styles.commentUser}>Maria dev</Text>
-              <Text style={styles.commentText}>¿Usaste Expo SDK 50?</Text>
-            </View>
-          </View>
-        </View>
       )}
-    </View>
-  )};
+    const EmptyPostsMessage = () => (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 50, paddingHorizontal: 40 }}>
+        <Ionicons name="newspaper-outline" size={80} color="#ccc" />
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#65676b', marginTop: 10, textAlign: 'center' }}>
+          No hay publicaciones aún
+        </Text>
+        <Text style={{ fontSize: 14, color: '#8a8d91', textAlign: 'center', marginTop: 5 }}>
+          ¡Sé el primero en compartir algo con la comunidad!
+        </Text>
+      </View>
+    );
 const renderPost2 = ({ item }) => {
   const isExpanded = expandedPostId === item.id; 
   const isMyPost = item.userId === (userData?.id || userData?.uid);
@@ -321,23 +305,27 @@ const renderPost2 = ({ item }) => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+                    <StatusBar 
+                            barStyle={'light-content'} 
+                            translucent={true} 
+                          />
+             <StatusBar_Fix></StatusBar_Fix>
        {/* Header Superior */}
-         <View style={{flexDirection: 'row',paddingHorizontal: 15,paddingTop: 18.5,paddingBottom: 10,elevation:20}}>
+         <View style={{flexDirection: 'row',paddingHorizontal: 15,paddingTop: 17,paddingBottom: 10}}>
+          
            <Text style={{fontSize: 28, fontWeight: 'bold', color: '#1877f2', letterSpacing: -1 , marginLeft:50, marginRight:10}}>InmiJobs</Text>
            <View style={{ flexDirection: 'row' }}>
              <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 90, marginLeft: 10}}><Ionicons name="search" size={19} /></TouchableOpacity>
-             <TouchableOpacity style={{backgroundColor: '#e4e6eb', padding: 12, borderRadius: 20, marginLeft: 10}}><Ionicons name="chatbubble-ellipses" size={19} /></TouchableOpacity>
              <TouchableOpacity onPress={()=>{router.replace('/pages/profile')}} style={{padding:3, backgroundColor:'white', borderRadius:90, elevation:10, marginLeft:10}}><Image source={{ uri: userData.image}} style={styles.avatar} /></TouchableOpacity>
            </View>
          </View>
      <FlatList
-  data={[...posts, ...POSTS]} // Une los datos de Firebase con los estáticos
+  data={posts} // Une los datos de Firebase con los estáticos
   keyExtractor={(item) => item.id}
   renderItem={({ item }) => (
-    // Si tiene 'description' viene de Firebase, si no, es del array POSTS
-    item.description ? renderPost2({ item }) : renderPost({ item })
-  )}
+ renderPost2({ item }) )
+  }
+  ListEmptyComponent={EmptyPostsMessage}
          ListHeaderComponent={() => (
           /* Sección "¿Qué estás pensando?" */
           <View style={styles.inputSection}>

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, StatusBar
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../Components/Data/DataProvider';
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import StatusBar_Fix from '../Components/StatusBar_fix'
 export default function Ajustes() {
   const { userData, logout } = useUser();
   const [notifications, setNotifications] = React.useState(true);

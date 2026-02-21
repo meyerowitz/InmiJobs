@@ -45,21 +45,14 @@ export default function Role() {
       title: 'Civil',
       desc: 'Busca y reserva alojamientos fácilmente',
       icon: <User size={30} color={theme.primary} />,
-      route: '/Register'
+      route: 'civil'
     },
     {
       id: 'reclutador',
       title: 'Reclutador',
       desc: 'Publica tus ofertas y encuentra talento',
       icon: <Briefcase size={30} color={theme.primary} />,
-      route: '/Register'
-    },
-    {
-      id: 'propietario',
-      title: 'Propietario',
-      desc: 'Ofrece tus propiedades en alquiler',
-      icon: <Home size={30} color={theme.primary} />,
-      route: '/Register'
+      route: 'reclutador'
     }
   ];
 
@@ -95,13 +88,16 @@ export default function Role() {
             padding: 25, 
             borderTopLeftRadius: 40, 
             borderTopRightRadius: 40, 
-            minHeight: height * 0.55 
+            minHeight: height * 0.85 
           }}>
             
             {roles.map((role) => (
               <TouchableOpacity 
                 key={role.id}
-                onPress={() => router.push(role.route)}
+                onPress={() => {router.push({
+                  pathname: '/Register', 
+                  params: { role: role.route} 
+                })}}
                 style={styles.card}
               >
                 <View style={[styles.iconContainer, { backgroundColor: theme.primary + '15' }]}>

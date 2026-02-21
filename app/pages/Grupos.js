@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, ImageBackground, TouchableOpacity, Te
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../Components/Data/DataProvider';
 import { SafeAreaView } from "react-native-safe-area-context";
+import StatusBar_Fix from '../Components/StatusBar_fix'
 
 export default function Grupos() {
   const { userData } = useUser();

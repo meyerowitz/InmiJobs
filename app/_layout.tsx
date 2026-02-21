@@ -2,7 +2,11 @@ import { Stack } from "expo-router";
 import { ThemeProvider } from './Components/Temas_y_colores/ThemeContext';
 import { UserProvider } from './Components/Data/DataProvider';
 import React from "react";
+import { StatusBar } from 'react-native'; // Importa el de react-native
+import { useEffect } from 'react';
+
 export default function RootLayout() {
+ 
   return (
   
     <ThemeProvider>

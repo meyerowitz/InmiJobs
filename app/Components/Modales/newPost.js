@@ -11,27 +11,26 @@ import {
   Platform,
   ActivityIndicator,Image,ScrollView
 } from 'react-native';
-import { useUser } from '../Data/DataProvider'; // Tu hook
-import { db } from '../../../firebaseConfig'; // Tu archivo de config de Firebase
+import { useUser } from '../Data/DataProvider';
+import { db } from '../../../firebaseConfig'; 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 
-const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
+const IMGBB_API_KEY = process.env.EXPO_PUBLIC_IMGBB_API_KEY;
 
 export default function NewPost({ visible, onClose }) {
  const [text, setText] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
-  const { userData } = useUser(); // Obtenemos el usuario del Provider
-  const [selectedImage, setSelectedImage] = useState(null); // URI local
+  const { userData } = useUser();
+  const [selectedImage, setSelectedImage] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // 1. Función para seleccionar imagen de la galería
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.7, // Comprimimos un poco para que suba rápido
+      quality: 0.7,
     });
 
     if (!result.canceled) {
@@ -41,12 +40,12 @@ export default function NewPost({ visible, onClose }) {
 
     const uploadToImgBB = async (uri) => {
       console.log('inicio uploadToImgBB')
-  const formData = new FormData();
-  formData.append('image', {
-    uri: uri,
-    type: 'image/jpeg', // Asegúrate de que esto coincida con el tipo de archivo
-    name: 'upload.jpg',
-  });
+      const formData = new FormData();
+      formData.append('image', {
+      uri: uri,
+      type: 'image/jpeg',
+      name: 'upload.jpg',
+    });
 
   try {
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
@@ -58,7 +57,6 @@ export default function NewPost({ visible, onClose }) {
     const data = await response.json();
 
     if (data.success) {
-      // display_url suele ser la versión más estable y directa para mostrar
       console.log("URL Directa generada:", data.data.display_url);
       return data.data.display_url; 
     } else {
@@ -79,7 +77,6 @@ export default function NewPost({ visible, onClose }) {
     try {
       let imageUrl = null;
 
-      // Si hay una imagen seleccionada, primero la subimos
       if (selectedImage) {
         setIsUploadingImage(true);
         imageUrl = await uploadToImgBB(selectedImage);
@@ -87,23 +84,21 @@ export default function NewPost({ visible, onClose }) {
         
         if (!imageUrl) throw new Error("Error al subir imagen");
       }
-      // Estructura de la tabla "Post"
       const postData = {
-        userId: userData.id || userData.uid, // ID del autor
-        userName: userData.name || 'Usuario', // Opcional: para no hacer tantos joins
-        userImage: userData.image || '',      // Opcional: imagen del autor
-        createdAt: serverTimestamp(),         // Fecha oficial de Firebase
+        userId: userData.id || userData.uid, 
+        userName: userData.name || 'Usuario', 
+        userImage: userData.image || '',      
+        createdAt: serverTimestamp(),       
         description: text,
         likesCount: 0,
         commentsCount: 0,
-        commentsData: [],                     // Array de comentarios (vacío al inicio)
+        commentsData: [],                     
         sharesCount: 0,
-        media: imageUrl ? [imageUrl] : [],                        // Espacio para array de imágenes/archivos
+        media: imageUrl ? [imageUrl] : [],                     
       };
 
       await addDoc(collection(db, "Post"), postData);
       
-     // Limpiar y cerrar
       setText('');
       setSelectedImage(null);
       onClose();
@@ -123,19 +118,16 @@ export default function NewPost({ visible, onClose }) {
       visible={visible}
       onRequestClose={onClose}
     >
-      {/* Overlay para cerrar al tocar fuera */}
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           
-          {/* Contenedor del Modal con Flex-End */}
           <TouchableWithoutFeedback>
             <KeyboardAvoidingView 
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               style={styles.modalContent}
             >
-              {/* Header */}
               <View style={styles.header}>
-                <View style={{ width: 40 }} /> {/* Espaciador */}
+                <View style={{ width: 40 }} /> 
                 <Text style={styles.headerTitle}>Crear publicación</Text>
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                   <Text style={{ fontSize: 18, color: '#65676b' }}>✕</Text>
@@ -157,7 +149,6 @@ export default function NewPost({ visible, onClose }) {
                 onChangeText={setText}
               />
 
-              {/* Previsualización de la imagen seleccionada */}
               {selectedImage && (
                 <View style={styles.previewContainer}>
                   <Image source={{ uri: selectedImage }} style={styles.previewImage} />
@@ -173,7 +164,6 @@ export default function NewPost({ visible, onClose }) {
               <View style={styles.toolbar}>
                 <Text style={styles.toolbarText}>Agregar a tu publicación</Text>
                 <View style={styles.iconsRow}>
-                  {/* Click en la galería para abrir selector */}
                   
                     <Text style={styles.icon}>🖼️</Text>
                   
@@ -211,7 +201,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end', // Aquí sucede la magia del "flex end"
+    justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: 'white',
@@ -322,17 +312,17 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     width: '100%',
-    height: 250,        // MUY IMPORTANTE: sin altura no se ve
+    height: 250,      
     borderRadius: 12,
     marginVertical: 5,
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#f0f2f5', // Fondo gris por si tarda en cargar
+    backgroundColor: '#f0f2f5', 
   },
   previewImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover', // Para que la foto llene el espacio
+    resizeMode: 'cover',
   },
   removeImageBadge: {
     position: 'absolute',
@@ -344,6 +334,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10, // Asegura que el botón X esté arriba
+    zIndex: 10, 
   },
 })

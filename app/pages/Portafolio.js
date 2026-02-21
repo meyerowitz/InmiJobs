@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../Components/Data/DataProvider';
 // import * as DocumentPicker from 'expo-document-picker'; // Opcional para subir archivos reales
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import StatusBar_Fix from '../Components/StatusBar_fix'
 const { width } = Dimensions.get('window');
 
 export default function Portafolio() {
@@ -46,7 +46,12 @@ export default function Portafolio() {
   return (
     <SafeAreaView style={{flex:1}}>
     <View style={styles.container}>
-         <StatusBar barStyle={'light-content'} backgroundColor={'#B85CFB'}/>
+          <StatusBar 
+                                     barStyle={'light-content'} 
+                                     backgroundColor={'red'} 
+                                     translucent={false} 
+                                   />
+                      <StatusBar_Fix></StatusBar_Fix>
       {/* Header Personalizado */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Mi Portafolio</Text>

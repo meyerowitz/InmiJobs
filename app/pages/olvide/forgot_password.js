@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet,Text,View, TextInput,TouchableOpacity} from 'react-native';
+import { StyleSheet,Text,View, TextInput,TouchableOpacity,StatusBar} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../Components/Temas_y_colores/ThemeContext';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from 'expo-status-bar';
-
+import StatusBar_Fix from '../../Components/StatusBar_fix'
 import {useRouter} from 'expo-router';
 
 export default function PasswordRecoveryScreen() {
@@ -14,12 +13,14 @@ export default function PasswordRecoveryScreen() {
 
   return (
     <>
-     <StatusBar 
-             style="light" backgroundColor={'#B85CFB'}
-             translucent={false}
-          />
+       
     <SafeAreaView style={styles.container}>
-        
+         <StatusBar 
+                                    barStyle={'light-content'} 
+                                    backgroundColor={'red'} 
+                                    translucent={false} 
+                                  />
+                     <StatusBar_Fix></StatusBar_Fix>
       {/* Botón Go Back */}
       <TouchableOpacity onPress={()=>{router.replace('Login')}} style={styles.backButton}>
         <Ionicons name="chevron-back" size={20} color="#9E9E9E" />

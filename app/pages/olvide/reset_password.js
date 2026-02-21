@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity,StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Para los iconos de candado y ojo
 import { useTheme } from '../../Components/Temas_y_colores/ThemeContext';
 import {useRouter} from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from 'expo-status-bar';
-
+import StatusBar_Fix from '../../Components/StatusBar_fix'
 export default function ForgotPassword() {
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
@@ -17,11 +16,19 @@ export default function ForgotPassword() {
 
   return (
     <>
-     <StatusBar 
-                 style="light" backgroundColor={'#B85CFB'}
-                 translucent={false}
-              />
+    
     <SafeAreaView style={styles.container}>
+        <StatusBar 
+                                   barStyle={'light-content'} 
+                                   backgroundColor={'red'} 
+                                   translucent={false} 
+                                 />
+                    <StatusBar_Fix></StatusBar_Fix>
+                    {/* Botón Volver */}
+                          <TouchableOpacity onPress={()=>{router.replace('/pages/olvide/forgot_password')}} style={styles.backButton}>
+                            <Ionicons name="chevron-back" size={24} color="#9E9E9E" />
+                            <Text style={styles.backText}>Go Back</Text>
+                          </TouchableOpacity>
       <View style={styles.content}>
         <Text style={styles.title}>Reset your password</Text>
         <Text style={styles.subtitle}>Please enter your new password</Text>
@@ -146,5 +153,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+   backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    marginTop: 10,
+  },
+  backText: {
+    fontSize: 16,
+    color: '#9E9E9E',
+    marginLeft: 4,
   },
 });

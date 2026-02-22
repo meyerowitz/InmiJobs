@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const IMGBB_API_KEY = process.env.EXPO_PUBLIC_IMGBB_API_KEY;
 
-export default function NewPost({ visible, onClose }) {
+export default function NewPost({ visible, onClose,type }) {
  const [text, setText] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const { userData } = useUser();
@@ -67,7 +67,7 @@ export default function NewPost({ visible, onClose }) {
     console.error("Error al conectar con ImgBB:", error);
     return null;
   }
-};
+    };
 
 
   const handlePublish = async () => {
@@ -94,7 +94,8 @@ export default function NewPost({ visible, onClose }) {
         commentsCount: 0,
         commentsData: [],                     
         sharesCount: 0,
-        media: imageUrl ? [imageUrl] : [],                     
+        media: imageUrl ? [imageUrl] : [],   
+        type: type                 
       };
 
       await addDoc(collection(db, "Post"), postData);

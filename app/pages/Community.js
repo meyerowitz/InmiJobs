@@ -343,7 +343,7 @@ const renderPost2 = ({ item }) => {
 />
 
     
-      <NewPost visible={newPostModal} onClose={() =>{ setnewPostModal(false)}} ></NewPost>
+      <NewPost visible={newPostModal} onClose={() =>{ setnewPostModal(false)}} type={'post'}></NewPost>
     </SafeAreaView>
   );
 };

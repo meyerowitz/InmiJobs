@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="https://unpkg.com">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        #map { height: 100vh; width: 100vw; background: #f0f0f0; }
+
+        /* Estilos de los Marcadores */
+        .avatar-container { display: flex; justify-content: center; align-items: center; }
+        .marker-avatar { width: 45px; height: 45px; border-radius: 18px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; z-index: 2; object-fit: cover; }
+        .marker-halo { position: absolute; width: 55px; height: 55px; border-radius: 22px; opacity: 0.6; filter: blur(8px); z-index: 1; animation: pulse 2s infinite; }
+        
+        .job-marker { width: 40px; height: 40px; background: white; border-radius: 12px; border: 2px solid #1877f2; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); overflow: hidden;}
+        .job-icon { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Estilos del Popup (Detalles del Job) */
+        .leaflet-popup-content-wrapper { border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .leaflet-popup-content { margin: 0; width: 220px !important; }
+        
+        .popup-container { display: flex; flex-direction: column; }
+        .popup-img { width: 100%; height: 100px; object-fit: cover; background: #eee; }
+        .popup-info { padding: 12px; }
+        .popup-title { font-weight: bold; fontSize: 14px; color: #333; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .popup-sector { font-size: 11px; color: #1877f2; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+        
+        .popup-btn { 
+            background: #1877f2; color: white; border: none; padding: 8px; border-radius: 10px; 
+            font-weight: 600; font-size: 12px; width: 100%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 0.3; } 100% { transform: scale(0.95); opacity: 0.6; } }
+        .leaflet-control-attribution { display: none; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map', { zoomControl: false, center: [8.29, -62.72], zoom: 15 });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        var userMarkers = {};
+        
+        window.renderUsers = function(users) {
+            users.forEach(user => {
+                var customIcon = L.divIcon({
+                    className: 'avatar-container',
+                    iconSize: [60, 60],
+                    html: `<div class="marker-halo" style="background-color: ${user.color || '#a855f7'}"></div><img src="${user.avatar}" class="marker-avatar" />`
+                });
+                if (!userMarkers[user.id]) {
+                    userMarkers[user.id] = L.marker([user.lat, user.lon], { icon: customIcon }).addTo(map);
+                } else {
+                    userMarkers[user.id].setLatLng([user.lat, user.lon]);
+                }
+            });
+        };
+
+        window.renderJobs = function(jobs) {
+            jobs.forEach(job => {
+                var jobIcon = L.divIcon({
+                    className: 'avatar-container',
+                    iconSize: [45, 45],
+                    html: `<div class="marker-halo" style="background-color: ${'#a855f7'}"></div><img src="${job.logo}" class="marker-avatar" />`
+                });
+
+                // Contenido del Popup
+                var popupHtml = `
+    <div class="popup-container">
+        <img src="${job.logo}" class="popup-img" />
+        <div class="popup-info">
+            <div class="popup-sector">${job.sector}</div>
+            <div class="popup-title">${job.title}</div>
+            <button class="popup-btn" onclick="goToProfile('${job.userId}')">
+                💬 Contactar Reclutador
+            </button>
+        </div>
+    </div>
+`;
+
+                L.marker([job.lat, job.lon], { icon: jobIcon })
+                    .addTo(map)
+                    .bindPopup(popupHtml, { closeButton: false });
+            });
+        };
+
+        // Función que se dispara al dar click en el botón del popup
+        function goToProfile(userId) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'GO_TO_PROFILE',
+                userId: userId
+            }));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            window.ReactNativeWebView.postMessage("MAP_LOADED");
+        });
+    </script>
+</body>
+</html>

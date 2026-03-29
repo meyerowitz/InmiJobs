@@ -9,9 +9,6 @@ https://github.com/user-attachments/assets/6994a301-ec80-46a4-bd07-fcec53cf28e7
 
 
 Este proyecto abarca el ciclo completo de desarrollo desde la conceptualización de la marca y diseño UI/UX, hasta la implementación técnica, de bases de datos y ejecución en Androids.
-<img width="1200" height="627" alt="Wireframing" src="https://github.com/user-attachments/assets/2ff30832-d79c-41ec-89df-4f4011964be7" />
-<img width="1200" height="627" alt="Wireframing (2)" src="https://github.com/user-attachments/assets/e93ef377-4cd3-4fb8-9501-6a73bf53bca5" />
-
 
 ## 🎨 Diseño y Branding (UI/UX)
 

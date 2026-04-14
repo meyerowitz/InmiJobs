@@ -2,7 +2,7 @@
 
 
 <p align="left">
-  <b>InmiJobs</b> es una plataforma móvil diseñada para conectar el talento con oportunidades laborales, optimizando la búsqueda de empleo y la gestión de vacantes a través de una experiencia de usuario intuitiva y moderna.
+  <b>InmiJobs</b> Plataforma móvil diseñada para conectar el talento con oportunidades laborales, optimizando la búsqueda de empleo y la gestión de vacantes a través de una experiencia de usuario intuitiva y moderna.
 </p>
 
 https://github.com/user-attachments/assets/6994a301-ec80-46a4-bd07-fcec53cf28e7
